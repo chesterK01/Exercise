@@ -16,11 +16,13 @@ var db *sql.DB
 // Cấu trúc Author
 type Author struct {
 	Name string `json:"name"`
+	ID   int    `json:"id"`
 }
 
 // Cấu trúc Book
 type Book struct {
 	Name string `json:"name"`
+	ID   int    `json:"id"`
 }
 
 // Cấu trúc AuthorBook cho mối quan hệ giữa tác giả và sách
@@ -138,6 +140,131 @@ func createAuthorBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Author-Book relationship created successfully!")
 }
 
+// API lấy danh sách Authors với số lượng tùy ý (mặc định là 10 nếu như không nhập gì)
+func getAuthors(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Lấy tham số "limit" từ query string, nếu không có sẽ mặc định là 10
+	limit := r.URL.Query().Get("limit")
+	if limit == "" {
+		limit = "10"
+	}
+	query := fmt.Sprintf("SELECT id, name FROM author LIMIT %s", limit)
+	rows, err := db.Query(query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var authors []Author
+	for rows.Next() {
+		var author Author
+		err := rows.Scan(&author.ID, &author.Name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		authors = append(authors, author)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(authors)
+}
+
+// API lấy danh sách Books với số lượng tùy ý (mặc định là 10 nếu như không nhập gì)
+func getBooks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Lấy tham số "limit" từ query string, nếu không có sẽ mặc định là 10
+	limit := r.URL.Query().Get("limit")
+	if limit == "" {
+		limit = "10"
+	}
+
+	query := fmt.Sprintf("SELECT id, name FROM book LIMIT %s", limit)
+	rows, err := db.Query(query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var books []Book
+	for rows.Next() {
+		var book Book
+		err := rows.Scan(&book.ID, &book.Name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		books = append(books, book)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(books)
+}
+
+// API lấy Author theo ID
+func getAuthorByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Lấy author_id từ URL
+	AuthorID := r.URL.Query().Get("id")
+	if AuthorID == "" {
+		http.Error(w, "Author ID not found", http.StatusBadRequest)
+		return
+	}
+
+	var author Author
+	query := "SELECT id, name FROM author WHERE id=?"
+	err := db.QueryRow(query, AuthorID).Scan(&author.ID, &author.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(author)
+}
+
+// API lấy Book theo ID
+func getBookByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Lấy book_id từ URL
+	bookID := r.URL.Query().Get("id")
+	if bookID == "" {
+		http.Error(w, "Missing book ID", http.StatusBadRequest)
+		return
+	}
+
+	var book Book
+	query := "SELECT id, name FROM book WHERE id = ?"
+	err := db.QueryRow(query, bookID).Scan(&book.ID, &book.Name)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Book not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(book)
+}
+
 func main() {
 	// Khởi tạo kết nối cơ sở dữ liệu
 	initDB()
@@ -146,6 +273,10 @@ func main() {
 	http.HandleFunc("/author", createAuthor)          // API tạo Author
 	http.HandleFunc("/book", createBook)              // API tạo Book
 	http.HandleFunc("/author_book", createAuthorBook) // API tạo mối quan hệ AuthorBook
+	http.HandleFunc("/authors", getAuthors)           // API lấy danh sách Authors tùy ý (mặc định là 10 Authors nếu như không nhập gì)
+	http.HandleFunc("/books", getBooks)               // API lấy danh sách Books tùy ý(mặc định là 10 Books nếu như không nhập)
+	http.HandleFunc("/author/id", getAuthorByID)      //API lấy danh sách Book theo ID
+	http.HandleFunc("/book/id", getBookByID)          //API lấy danh sách Book theo ID
 
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
