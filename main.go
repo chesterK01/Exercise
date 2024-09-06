@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/books", handlers.GetBooks)
 	http.HandleFunc("/author/id", handlers.GetAuthorByID)
 	http.HandleFunc("/book/id", handlers.GetBookByID)
+	http.HandleFunc("/books/author", handlers.GetBooksByAuthorName)
 
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
