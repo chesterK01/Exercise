@@ -16,7 +16,7 @@ type AuthorBookRepository struct {
 
 // Create a new author-book relationship
 func (_self AuthorBookRepository) CreateAuthorBook(authorBook *models.Author_Book) error {
-	query := "INSERT INTO author_book (author_id, book_id) VALUES (?, ?)"
+	query := `INSERT INTO author_book (author_id, book_id) VALUES (?, ?)`
 	_, err := _self.DB.Exec(query, authorBook.AuthorID, authorBook.BookID)
 	return err
 }

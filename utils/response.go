@@ -5,12 +5,12 @@ import (
 	"net/http"
 )
 
-// Cấu trúc để phản hồi lỗi
+// Structure for error response
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// Trả về lỗi dưới dạng JSON
+// Return errors as JSON
 func ReturnErrorJSON(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

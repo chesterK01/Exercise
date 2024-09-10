@@ -13,6 +13,7 @@ type AuthorHandler struct {
 	IAuthorService services.IAuthorService
 }
 
+// API to create a new Author
 func (_self AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "POST" {
@@ -37,6 +38,7 @@ func (_self AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Author created successfully", "id": id})
 }
 
+// API to get all Authors
 func (_self AuthorHandler) GetAuthors(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "GET" {
@@ -59,6 +61,7 @@ func (_self AuthorHandler) GetAuthors(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(authors)
 }
 
+// API to get Author by authorID
 func (_self AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "GET" {
@@ -66,7 +69,7 @@ func (_self AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Lấy author_id từ query parameters
+	// Get author_id from query parameters
 	authorIDStr := r.URL.Query().Get("id")
 	authorID, err := strconv.Atoi(authorIDStr)
 	if err != nil {
@@ -74,7 +77,7 @@ func (_self AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Gọi service để lấy thông tin tác giả
+	// Call service to get Author's information
 	author, err := _self.IAuthorService.GetAuthorByID(authorID)
 	if err != nil {
 		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
@@ -85,6 +88,6 @@ func (_self AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Trả về dữ liệu tác giả dưới dạng JSON
+	// Return Author data as JSON
 	json.NewEncoder(w).Encode(author)
 }

@@ -15,6 +15,7 @@ type AuthorRepository struct {
 	DB *sql.DB
 }
 
+// Create a new Author
 func (_self AuthorRepository) CreateAuthor(author *models.Author) (int64, error) {
 	query := "INSERT INTO author (name) VALUES (?)"
 	result, err := _self.DB.Exec(query, author.Name)
@@ -24,8 +25,9 @@ func (_self AuthorRepository) CreateAuthor(author *models.Author) (int64, error)
 	return result.LastInsertId()
 }
 
+// Get all Authors
 func (_self AuthorRepository) GetAuthors(limit int) ([]models.Author, error) {
-	query := "SELECT id, name FROM author LIMIT ?"
+	query := `SELECT id, name FROM author LIMIT ?`
 	rows, err := _self.DB.Query(query, limit)
 	if err != nil {
 		return nil, err
@@ -43,9 +45,10 @@ func (_self AuthorRepository) GetAuthors(limit int) ([]models.Author, error) {
 	return authors, nil
 }
 
+// Get Author by authorID
 func (_self AuthorRepository) GetAuthorByID(authorID int) (*models.Author, error) {
 	var author models.Author
-	query := "SELECT id, name FROM author WHERE id = ?"
+	query := `SELECT id, name FROM author WHERE id = ?`
 	err := _self.DB.QueryRow(query, authorID).Scan(&author.ID, &author.Name)
 	if err == sql.ErrNoRows {
 		return nil, nil

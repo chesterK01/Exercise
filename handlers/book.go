@@ -13,11 +13,10 @@ type BookHandler struct {
 	IBookService services.IBookService
 }
 
-// Hàm tạo Book
+// API to create a new Book
 func (_self BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Kiểm tra nếu phương thức không phải là POST
 	if r.Method != "POST" {
 		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return
@@ -36,16 +35,14 @@ func (_self BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Trả về mã trạng thái 201 (Created)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Book created successfully", "id": id})
 }
 
-// Hàm lấy danh sách Books
+// API to get all Books
 func (_self BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Kiểm tra nếu phương thức không phải là GET
 	if r.Method != "GET" {
 		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return
@@ -54,7 +51,7 @@ func (_self BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		limit = 10 // Nếu không có limit, mặc định là 10
+		limit = 10 // If there is no limit, the default is 10
 	}
 
 	books, err := _self.IBookService.GetBooks(limit)
@@ -66,11 +63,10 @@ func (_self BookHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(books)
 }
 
-// Hàm lấy Book theo ID
+// API to get Book by bookID
 func (_self BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Kiểm tra nếu phương thức không phải là GET
 	if r.Method != "GET" {
 		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return
@@ -94,5 +90,6 @@ func (_self BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return Book data as JSON
 	json.NewEncoder(w).Encode(book)
 }

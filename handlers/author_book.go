@@ -12,7 +12,7 @@ type AuthorBookHandler struct {
 	IAuthorBookService services.IAuthorBookService
 }
 
-// API to create a new author-book relationship
+// API to create a new Author-Book relationship
 func (_self AuthorBookHandler) CreateAuthorBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "POST" {
@@ -37,7 +37,7 @@ func (_self AuthorBookHandler) CreateAuthorBook(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Author-Book relationship created successfully"})
 }
 
-// API to get books by author's name (fuzzy search)
+// API to get Books by authorName
 func (_self AuthorBookHandler) GetBooksByAuthorName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "GET" {
