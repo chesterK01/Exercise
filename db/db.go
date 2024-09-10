@@ -10,18 +10,23 @@ import (
 
 var DB *sql.DB
 
-// Khởi tạo kết nối cơ sở dữ liệu
-func InitDB() {
-	var err error
+func InitDB() *sql.DB {
+	// Chuỗi kết nối đến MySQL
 	dsn := "root:ngoctuan1072003@tcp(localhost:3306)/library"
-	DB, err = sql.Open("mysql", dsn)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error opening database: %v", err)
 	}
 
-	err = DB.Ping()
+	// Kiểm tra kết nối
+	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error connecting to the database: %v", err)
 	}
-	fmt.Println("Kết nối thành công đến MySQL!")
+
+	fmt.Println("Successfully connected to the database")
+
+	// Lưu kết nối vào biến toàn cục
+	DB = db
+	return db
 }
