@@ -8,6 +8,7 @@ import (
 type IAuthorBookRepository interface {
 	CreateAuthorBook(*models.Author_Book) error
 	GetBooksByAuthorName(authorName string) ([]models.Book, error)
+	GetAllAuthorBookRelationships() ([]models.Author_Book, error)
 }
 
 type AuthorBookRepository struct {
@@ -23,7 +24,7 @@ func (_self AuthorBookRepository) CreateAuthorBook(authorBook *models.Author_Boo
 
 // Get books by author's name
 func (_self AuthorBookRepository) GetBooksByAuthorName(authorName string) ([]models.Book, error) {
-	query := `
+	query := `	
 		SELECT b.id, b.name
 		FROM book b
 		JOIN author_book ab ON b.id = ab.book_id
@@ -45,4 +46,31 @@ func (_self AuthorBookRepository) GetBooksByAuthorName(authorName string) ([]mod
 		books = append(books, book)
 	}
 	return books, nil
+}
+
+// Get all relationships with author_name and book_name
+func (_self *AuthorBookRepository) GetAllAuthorBookRelationships() ([]models.Author_Book, error) {
+	// Query to join author, book, and author_book tables
+	query := `
+		SELECT a.id, a.name, b.id, b.name
+		FROM author_book ab
+		INNER JOIN author a ON ab.author_id = a.id
+		INNER JOIN book b ON ab.book_id = b.id`
+
+	rows, err := _self.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var relationships []models.Author_Book
+	for rows.Next() {
+		var authorBook models.Author_Book
+		if err := rows.Scan(&authorBook.AuthorID, &authorBook.AuthorName, &authorBook.BookID, &authorBook.BookName); err != nil {
+			return nil, err
+		}
+		relationships = append(relationships, authorBook)
+	}
+
+	return relationships, nil
 }

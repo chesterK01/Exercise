@@ -8,6 +8,7 @@ import (
 type IAuthorBookService interface {
 	CreateAuthorBook(*models.Author_Book) error
 	GetBooksByAuthorName(authorName string) ([]models.Book, error)
+	GetAllAuthorBookRelationships() ([]models.Author_Book, error)
 }
 
 type AuthorBookService struct {
@@ -20,4 +21,8 @@ func (_self AuthorBookService) CreateAuthorBook(authorBook *models.Author_Book) 
 
 func (_self AuthorBookService) GetBooksByAuthorName(authorName string) ([]models.Book, error) {
 	return _self.AuthorBookRepo.GetBooksByAuthorName(authorName)
+}
+
+func (_self AuthorBookService) GetAllAuthorBookRelationships() ([]models.Author_Book, error) {
+	return _self.AuthorBookRepo.GetAllAuthorBookRelationships()
 }

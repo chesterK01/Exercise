@@ -38,8 +38,9 @@ func main() {
 	http.HandleFunc("/books", bookHandler.GetBooks)      // Get all Books
 	http.HandleFunc("/book/id", bookHandler.GetBookByID) // Get Book by bookID
 
-	http.HandleFunc("/author_book", authorBookHandler.CreateAuthorBook)      // Create a new Author-Book relationship
-	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName) // Get Book by Author_name
+	http.HandleFunc("/author_book", authorBookHandler.CreateAuthorBook)                            // Create a new Author-Book relationship
+	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName)                       // Get Book by Author_name
+	http.HandleFunc("/author_book/relationships", authorBookHandler.GetAllAuthorBookRelationships) // Get all author-book relationships
 
 	// Start server
 	fmt.Println("Server is running at http://localhost:8080")
