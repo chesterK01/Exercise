@@ -6,7 +6,7 @@ import (
 )
 
 type IBookService interface {
-	CreateBook(book *models.Book) (int64, error)
+	CreateBook(*models.Book) (int64, error)
 	GetBooks(limit int) ([]models.Book, error)
 	GetBookByID(bookID int) (*models.Book, error)
 }

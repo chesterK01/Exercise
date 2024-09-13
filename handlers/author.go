@@ -23,7 +23,7 @@ func (_self AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) 
 
 	var author models.Author
 	err := json.NewDecoder(r.Body).Decode(&author)
-	if err != nil {
+	if err != nil || author.Name == "" { // Check thêm nếu tên tác giả trống
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
 		return
 	}

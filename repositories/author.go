@@ -17,7 +17,7 @@ type AuthorRepository struct {
 
 // Create a new Author
 func (_self AuthorRepository) CreateAuthor(author *models.Author) (int64, error) {
-	query := "INSERT INTO author (name) VALUES (?)"
+	query := `INSERT INTO author (name) VALUES ?`
 	result, err := _self.DB.Exec(query, author.Name)
 	if err != nil {
 		return 0, err

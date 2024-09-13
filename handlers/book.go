@@ -16,7 +16,6 @@ type BookHandler struct {
 // API to create a new Book
 func (_self BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
 	if r.Method != "POST" {
 		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method Not Allowed")
 		return

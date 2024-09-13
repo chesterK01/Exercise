@@ -16,7 +16,7 @@ type BookRepository struct {
 }
 
 // Create a new Book
-func (_self *BookRepository) CreateBook(book *models.Book) (int64, error) {
+func (_self BookRepository) CreateBook(book *models.Book) (int64, error) {
 	query := `INSERT INTO book (name) VALUES ?`
 	result, err := _self.DB.Exec(query, book.Name)
 	if err != nil {
