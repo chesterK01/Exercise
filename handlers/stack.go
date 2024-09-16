@@ -81,7 +81,7 @@ func (_self *StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Requ
 }
 
 // API 3: Lấy danh sách sách
-func (_self *StackHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
+func (_self *StackHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {
@@ -89,11 +89,11 @@ func (_self *StackHandler) GetBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	books, err := _self.IStackService.GetAllBooks()
+	stacks, err := _self.IStackService.GetAllBooks()
 	if err != nil {
 		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	json.NewEncoder(w).Encode(books)
+	json.NewEncoder(w).Encode(stacks)
 }
