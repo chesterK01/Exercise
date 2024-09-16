@@ -17,7 +17,7 @@ type StackRepository struct {
 }
 
 // Add stock for a specific book
-func (_self *StackRepository) UpdateBookStock(bookID int, stock int) error {
+func (_self StackRepository) UpdateBookStock(bookID int, stock int) error {
 	_, err := _self.DB.Exec("UPDATE stack SET stock = ? WHERE id = ?", stock, bookID)
 	if err != nil {
 		return errors.New("failed to update stock")
@@ -26,7 +26,7 @@ func (_self *StackRepository) UpdateBookStock(bookID int, stock int) error {
 }
 
 // Save book quality
-func (_self *StackRepository) UpdateBookQuality(bookID int, quality string) error {
+func (_self StackRepository) UpdateBookQuality(bookID int, quality string) error {
 	_, err := _self.DB.Exec("UPDATE stack SET quality = ? WHERE id = ?", quality, bookID)
 	if err != nil {
 		return errors.New("failed to update quality")
@@ -35,7 +35,7 @@ func (_self *StackRepository) UpdateBookQuality(bookID int, quality string) erro
 }
 
 // Get list of all books
-func (_self *StackRepository) GetAllBooks() ([]models.Stack, error) {
+func (_self StackRepository) GetAllBooks() ([]models.Stack, error) {
 	rows, err := _self.DB.Query("SELECT id, title, stock, quality FROM stack")
 	if err != nil {
 		return nil, err

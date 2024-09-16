@@ -13,7 +13,7 @@ type StackHandler struct {
 }
 
 // API 1: Nhập số lượng tồn kho từng sách
-func (_self *StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request) {
+func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "PUT" {
@@ -47,7 +47,7 @@ func (_self *StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Reques
 }
 
 // API 2: Lưu chất lượng sách
-func (_self *StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Request) {
+func (_self StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "PUT" {
@@ -81,7 +81,7 @@ func (_self *StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Requ
 }
 
 // API 3: Lấy danh sách sách
-func (_self *StackHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
+func (_self StackHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {
