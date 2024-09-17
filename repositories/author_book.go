@@ -9,6 +9,7 @@ type IAuthorBookRepository interface {
 	CreateAuthorBook(*models.Author_Book) error
 	GetBooksByAuthorName(authorName string) ([]models.Book, error)
 	GetAllAuthorBookRelationships() ([]models.Author_Book, error)
+	GetAuthorBookByBookID(bookID int) (*models.Author_Book, error)
 }
 
 type AuthorBookRepository struct {
@@ -73,4 +74,16 @@ func (_self *AuthorBookRepository) GetAllAuthorBookRelationships() ([]models.Aut
 	}
 
 	return relationships, nil
+}
+func (_self AuthorBookRepository) GetAuthorBookByBookID(bookID int) (*models.Author_Book, error) {
+	var authorBook models.Author_Book
+	err := _self.DB.QueryRow("SELECT author_id, author_name, book_id, book_name FROM author_book WHERE book_id = ?", bookID).
+		Scan(&authorBook.AuthorID, &authorBook.AuthorName, &authorBook.BookID, &authorBook.BookName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // Nếu không tìm thấy
+		}
+		return nil, err
+	}
+	return &authorBook, nil
 }

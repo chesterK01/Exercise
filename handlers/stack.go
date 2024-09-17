@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
 	"encoding/json"
@@ -10,8 +9,8 @@ import (
 )
 
 type StackHandler struct {
-	IStackService services.IStackService
-	IBookService  services.IBookService
+	IStackService      services.IStackService
+	IAuthorBookService services.IAuthorBookService
 }
 
 // API 1: Nhập số lượng tồn kho từng sách
@@ -30,20 +29,22 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var data models.UpdateStockRequest
+	var data struct {
+		Stock int `json:"stock"`
+	}
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
 		return
 	}
 
-	// Lấy thông tin của book từ BookService
-	book, err := _self.IBookService.GetBookByID(bookID) // Đảm bảo rằng book là models.Book
+	// Lấy thông tin Author_Book từ AuthorBookService
+	authorBook, err := _self.IAuthorBookService.GetAuthorBookByBookID(bookID)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, "Error fetching book")
+		utils.ReturnErrorJSON(w, http.StatusInternalServerError, "Error fetching author-book relationship")
 		return
 	}
-	if book == nil {
+	if authorBook == nil {
 		utils.ReturnErrorJSON(w, http.StatusNotFound, "Book not found")
 		return
 	}
@@ -57,10 +58,11 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 
 	// Trả về JSON với các thông tin cần thiết
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message":   "Stock updated successfully",
-		"bookTitle": book.Title,    // Trường Title từ struct Book
-		"authorID":  book.AuthorID, // Trường AuthorID từ struct Book
-		"newStock":  data.Stock,
+		"message":    "Stock updated successfully",
+		"bookTitle":  authorBook.BookName,   // Trường BookName từ struct Author_Book
+		"authorID":   authorBook.AuthorID,   // Trường AuthorID từ struct Author_Book
+		"authorName": authorBook.AuthorName, // Trường AuthorName từ struct Author_Book
+		"newStock":   data.Stock,
 	})
 }
 
