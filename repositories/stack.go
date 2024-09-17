@@ -38,10 +38,21 @@ func (_self StackRepository) UpdateBookStock(bookID int, stock int) error {
 
 // Save book quality
 func (_self StackRepository) UpdateBookQuality(bookID int, quality string) error {
-	_, err := _self.DB.Exec("UPDATE stack SET quality = ? WHERE id = ?", quality, bookID)
+	result, err := _self.DB.Exec("UPDATE stack SET quality = ? WHERE id = ?", quality, bookID)
 	if err != nil {
 		return errors.New("failed to update quality")
 	}
+
+	// Kiểm tra số hàng bị ảnh hưởng
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("failed to check affected rows")
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("book not found")
+	}
+
 	return nil
 }
 

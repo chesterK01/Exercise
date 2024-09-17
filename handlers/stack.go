@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
 	"encoding/json"
@@ -10,6 +11,7 @@ import (
 
 type StackHandler struct {
 	IStackService services.IStackService
+	IBookService  services.IBookService
 }
 
 // API 1: Nhập số lượng tồn kho từng sách
@@ -28,27 +30,38 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var data struct {
-		Stock int `json:"stock"`
-	}
+	var data models.UpdateStockRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
 		return
 	}
 
-	// Gọi service để cập nhật tồn kho
-	err = _self.IStackService.UpdateBookStock(bookID, data.Stock)
+	// Lấy thông tin của book từ BookService
+	book, err := _self.IBookService.GetBookByID(bookID) // Đảm bảo rằng book là models.Book
 	if err != nil {
-		if err.Error() == "book not found" {
-			utils.ReturnErrorJSON(w, http.StatusNotFound, "Book ID not found")
-		} else {
-			utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
-		}
+		utils.ReturnErrorJSON(w, http.StatusInternalServerError, "Error fetching book")
+		return
+	}
+	if book == nil {
+		utils.ReturnErrorJSON(w, http.StatusNotFound, "Book not found")
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Stock updated successfully"})
+	// Gọi StackService để cập nhật tồn kho
+	err = _self.IStackService.UpdateBookStock(bookID, data.Stock)
+	if err != nil {
+		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Trả về JSON với các thông tin cần thiết
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message":   "Stock updated successfully",
+		"bookTitle": book.Title,    // Trường Title từ struct Book
+		"authorID":  book.AuthorID, // Trường AuthorID từ struct Book
+		"newStock":  data.Stock,
+	})
 }
 
 // API 2: Lưu chất lượng sách
