@@ -12,17 +12,17 @@ type IBookService interface {
 }
 
 type BookService struct {
-	BookRepo repositories.IBookRepository
+	IBookRepo repositories.IBookRepository
 }
 
 func (_self BookService) CreateBook(book *models.Book) (int64, error) {
-	return _self.BookRepo.CreateBook(book)
+	return _self.IBookRepo.CreateBook(book)
 }
 
 func (_self BookService) GetBooks(limit int) ([]models.Book, error) {
-	return _self.BookRepo.GetBooks(limit)
+	return _self.IBookRepo.GetBooks(limit)
 }
 
 func (_self BookService) GetBookByID(bookID int) (*models.Book, error) {
-	return _self.BookRepo.GetBookByID(bookID)
+	return _self.IBookRepo.GetBookByID(bookID)
 }

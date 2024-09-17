@@ -37,9 +37,14 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Gọi service để cập nhật tồn kho
 	err = _self.IStackService.UpdateBookStock(bookID, data.Stock)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		if err.Error() == "book not found" {
+			utils.ReturnErrorJSON(w, http.StatusNotFound, "Book ID not found")
+		} else {
+			utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 

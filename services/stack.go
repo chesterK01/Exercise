@@ -12,16 +12,16 @@ type IStackService interface {
 }
 
 type StackService struct {
-	StackRepo repositories.IStackRepository
+	IStackRepo repositories.IStackRepository
 }
 
 func (_self StackService) UpdateBookStock(bookID int, stock int) error {
-	return _self.StackRepo.UpdateBookStock(bookID, stock)
+	return _self.IStackRepo.UpdateBookStock(bookID, stock)
 }
 
 func (_self StackService) UpdateBookQuality(bookID int, quality string) error {
-	return _self.StackRepo.UpdateBookQuality(bookID, quality)
+	return _self.IStackRepo.UpdateBookQuality(bookID, quality)
 }
 func (_self StackService) GetAllBooks() ([]models.Stack, error) {
-	return _self.StackRepo.GetAllBooks()
+	return _self.IStackRepo.GetAllBooks()
 }

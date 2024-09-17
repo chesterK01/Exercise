@@ -18,10 +18,21 @@ type StackRepository struct {
 
 // Add stock for a specific book
 func (_self StackRepository) UpdateBookStock(bookID int, stock int) error {
-	_, err := _self.DB.Exec("UPDATE stack SET stock = ? WHERE id = ?", stock, bookID)
+	result, err := _self.DB.Exec("UPDATE stack SET stock = ? WHERE id = ?", stock, bookID)
 	if err != nil {
 		return errors.New("failed to update stock")
 	}
+
+	// Kiểm tra số hàng bị ảnh hưởng
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("failed to check affected rows")
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("book not found") // Trả về lỗi nếu không có bản ghi nào bị cập nhật
+	}
+
 	return nil
 }
 

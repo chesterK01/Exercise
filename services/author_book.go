@@ -12,17 +12,17 @@ type IAuthorBookService interface {
 }
 
 type AuthorBookService struct {
-	AuthorBookRepo repositories.IAuthorBookRepository
+	IAuthorBookRepo repositories.IAuthorBookRepository
 }
 
 func (_self AuthorBookService) CreateAuthorBook(authorBook *models.Author_Book) error {
-	return _self.AuthorBookRepo.CreateAuthorBook(authorBook)
+	return _self.IAuthorBookRepo.CreateAuthorBook(authorBook)
 }
 
 func (_self AuthorBookService) GetBooksByAuthorName(authorName string) ([]models.Book, error) {
-	return _self.AuthorBookRepo.GetBooksByAuthorName(authorName)
+	return _self.IAuthorBookRepo.GetBooksByAuthorName(authorName)
 }
 
 func (_self AuthorBookService) GetAllAuthorBookRelationships() ([]models.Author_Book, error) {
-	return _self.AuthorBookRepo.GetAllAuthorBookRelationships()
+	return _self.IAuthorBookRepo.GetAllAuthorBookRelationships()
 }

@@ -21,10 +21,10 @@ func main() {
 	stackRepo := repositories.StackRepository{DB: dbConn}
 
 	// Create services
-	authorService := services.AuthorService{AuthorRepo: &authorRepo}
-	bookService := services.BookService{BookRepo: &bookRepo}
-	authorBookService := services.AuthorBookService{AuthorBookRepo: &authorBookRepo}
-	stackService := services.StackService{StackRepo: &stackRepo}
+	authorService := services.AuthorService{IAuthorRepo: &authorRepo}
+	bookService := services.BookService{IBookRepo: &bookRepo}
+	authorBookService := services.AuthorBookService{IAuthorBookRepo: &authorBookRepo}
+	stackService := services.StackService{IStackRepo: &stackRepo}
 
 	// Create handlers
 	authorHandler := handlers.AuthorHandler{IAuthorService: &authorService}
@@ -46,7 +46,7 @@ func main() {
 	http.HandleFunc("/author_book", authorBookHandler.CreateAuthorBook)                            // Create a new Author-Book relationship
 	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName)                       // Get Book by Author_name
 	http.HandleFunc("/author_book/relationships", authorBookHandler.GetAllAuthorBookRelationships) // Get all author-book relationships
-	http.HandleFunc("/stock", stackHandler.GetAllBooks)
+	http.HandleFunc("/stocks", stackHandler.GetAllBooks)
 
 	// Start server
 	fmt.Println("Server is running at http://localhost:8080")
