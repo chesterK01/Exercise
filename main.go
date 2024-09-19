@@ -30,7 +30,10 @@ func main() {
 	authorHandler := handlers.AuthorHandler{IAuthorService: &authorService}
 	bookHandler := handlers.BookHandler{IBookService: &bookService}
 	authorBookHandler := handlers.AuthorBookHandler{IAuthorBookService: &authorBookService}
-	stackHandler := handlers.StackHandler{IStackService: &stackService}
+	stackHandler := handlers.StackHandler{
+		IStackService:      &stackService,
+		IAuthorBookService: &authorBookService, // Bổ sung IAuthorBookService
+	}
 
 	// Routing API
 	http.HandleFunc("/author", authorHandler.CreateAuthor)     // Create a new Author
@@ -47,6 +50,7 @@ func main() {
 	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName)                       // Get Book by Author_name
 	http.HandleFunc("/author_book/relationships", authorBookHandler.GetAllAuthorBookRelationships) // Get all author-book relationships
 	http.HandleFunc("/stocks", stackHandler.GetAllBooks)
+	http.HandleFunc("/author_book/book", authorBookHandler.GetAuthorBookByBookID) // Get Author-Book by bookID
 
 	// Start server
 	fmt.Println("Server is running at http://localhost:8080")

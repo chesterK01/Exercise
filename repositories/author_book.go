@@ -3,6 +3,7 @@ package repositories
 import (
 	"Exercise1/models"
 	"database/sql"
+	"fmt"
 )
 
 type IAuthorBookRepository interface {
@@ -20,7 +21,10 @@ type AuthorBookRepository struct {
 func (_self AuthorBookRepository) CreateAuthorBook(authorBook *models.Author_Book) error {
 	query := `INSERT INTO author_book (author_id, book_id) VALUES (?, ?)`
 	_, err := _self.DB.Exec(query, authorBook.AuthorID, authorBook.BookID)
-	return err
+	if err != nil {
+		return fmt.Errorf("error creating author-book relationship: %v", err)
+	}
+	return nil
 }
 
 // Get books by author's name
@@ -34,7 +38,7 @@ func (_self AuthorBookRepository) GetBooksByAuthorName(authorName string) ([]mod
 	`
 	rows, err := _self.DB.Query(query, "%"+authorName+"%")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error fetching books by author name: %v", err)
 	}
 	defer rows.Close()
 
@@ -42,25 +46,28 @@ func (_self AuthorBookRepository) GetBooksByAuthorName(authorName string) ([]mod
 	for rows.Next() {
 		var book models.Book
 		if err := rows.Scan(&book.ID, &book.Name); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error scanning book data: %v", err)
 		}
 		books = append(books, book)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading rows: %v", err)
 	}
 	return books, nil
 }
 
-// Get all relationships with author_name and book_name
-func (_self *AuthorBookRepository) GetAllAuthorBookRelationships() ([]models.Author_Book, error) {
-	// Query to join author, book, and author_book tables
+// Get all author-book relationships with author_name and book_name
+func (_self AuthorBookRepository) GetAllAuthorBookRelationships() ([]models.Author_Book, error) {
 	query := `
 		SELECT a.id, a.name, b.id, b.name
 		FROM author_book ab
 		INNER JOIN author a ON ab.author_id = a.id
-		INNER JOIN book b ON ab.book_id = b.id`
+		INNER JOIN book b ON ab.book_id = b.id
+	`
 
 	rows, err := _self.DB.Query(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error fetching author-book relationships: %v", err)
 	}
 	defer rows.Close()
 
@@ -68,20 +75,34 @@ func (_self *AuthorBookRepository) GetAllAuthorBookRelationships() ([]models.Aut
 	for rows.Next() {
 		var authorBook models.Author_Book
 		if err := rows.Scan(&authorBook.AuthorID, &authorBook.AuthorName, &authorBook.BookID, &authorBook.BookName); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error scanning author-book data: %v", err)
 		}
 		relationships = append(relationships, authorBook)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading rows: %v", err)
 	}
 
 	return relationships, nil
 }
+
+// Get author-book relationship by bookID
 func (_self AuthorBookRepository) GetAuthorBookByBookID(bookID int) (*models.Author_Book, error) {
 	var authorBook models.Author_Book
-	err := _self.DB.QueryRow("SELECT author_id, author_name, book_id, book_name FROM author_book WHERE book_id = ?", bookID).
-		Scan(&authorBook.AuthorID, &authorBook.AuthorName, &authorBook.BookID, &authorBook.BookName)
+	query := `
+        SELECT a.id, a.name, b.id, b.name
+        FROM author_book ab
+        INNER JOIN author a ON ab.author_id = a.id
+        INNER JOIN book b ON ab.book_id = b.id
+        WHERE b.id = ?
+    `
+	err := _self.DB.QueryRow(query, bookID).Scan(
+		&authorBook.AuthorID, &authorBook.AuthorName,
+		&authorBook.BookID, &authorBook.BookName,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // Nếu không tìm thấy
+			return nil, nil
 		}
 		return nil, err
 	}

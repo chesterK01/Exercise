@@ -9,3 +9,6 @@ type Stack struct {
 type UpdateStockRequest struct {
 	Stock int `json:"stock"` // Struct chứa thông tin cập nhật stock
 }
+type UpdateQualityRequest struct {
+	Quality string `json:"quality"`
+}

@@ -6,6 +6,7 @@ import (
 	"Exercise1/utils"
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type AuthorBookHandler struct {
@@ -91,4 +92,45 @@ func (_self AuthorBookHandler) GetAllAuthorBookRelationships(w http.ResponseWrit
 
 	// Send back the relationships as JSON
 	json.NewEncoder(w).Encode(relationships)
+}
+
+// API to get Author-Book relationship by Book ID
+func (_self AuthorBookHandler) GetAuthorBookByBookID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Check if the method is GET
+	if r.Method != "GET" {
+		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	// Get the book ID from the URL query params (change "book_id" to "id")
+	bookIDStr := r.URL.Query().Get("id")
+	if bookIDStr == "" {
+		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Missing book ID")
+		return
+	}
+
+	// Convert book ID from string to integer
+	bookID, err := strconv.Atoi(bookIDStr)
+	if err != nil {
+		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid book ID")
+		return
+	}
+
+	// Call the service to get the author-book relationship by book ID
+	authorBook, err := _self.IAuthorBookService.GetAuthorBookByBookID(bookID)
+	if err != nil {
+		utils.ReturnErrorJSON(w, http.StatusInternalServerError, "Error fetching author-book relationship")
+		return
+	}
+
+	// If the relationship was not found
+	if authorBook == nil {
+		utils.ReturnErrorJSON(w, http.StatusNotFound, "Author-Book relationship not found")
+		return
+	}
+
+	// Success response with the author-book relationship
+	json.NewEncoder(w).Encode(authorBook)
 }

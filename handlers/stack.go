@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -13,7 +15,6 @@ type StackHandler struct {
 	IAuthorBookService services.IAuthorBookService
 }
 
-// API 1: Nhập số lượng tồn kho từng sách
 func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -22,17 +23,24 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Lấy book ID từ query parameter 'id'
 	bookIDStr := r.URL.Query().Get("id")
+	fmt.Println("Received bookIDStr:", bookIDStr) // Thêm dòng in ra giá trị bookIDStr
+
+	if bookIDStr == "" {
+		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Missing book ID")
+		return
+	}
+
+	// Chuyển đổi bookID từ chuỗi sang số nguyên
 	bookID, err := strconv.Atoi(bookIDStr)
 	if err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid book ID")
 		return
 	}
 
-	var data struct {
-		Stock int `json:"stock"`
-	}
-
+	// Decode body để lấy thông tin stock
+	var data models.UpdateStockRequest
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
 		return
@@ -56,12 +64,12 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Trả về JSON với các thông tin cần thiết
+	// Trả về JSON với thông tin cập nhật
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":    "Stock updated successfully",
-		"bookTitle":  authorBook.BookName,   // Trường BookName từ struct Author_Book
-		"authorID":   authorBook.AuthorID,   // Trường AuthorID từ struct Author_Book
-		"authorName": authorBook.AuthorName, // Trường AuthorName từ struct Author_Book
+		"bookTitle":  authorBook.BookName,
+		"authorID":   authorBook.AuthorID,
+		"authorName": authorBook.AuthorName,
 		"newStock":   data.Stock,
 	})
 }
@@ -82,9 +90,7 @@ func (_self StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var data struct {
-		Quality string `json:"quality"`
-	}
+	var data models.UpdateQualityRequest // Sử dụng struct từ package models
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
