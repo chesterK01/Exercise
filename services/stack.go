@@ -1,27 +1,22 @@
 package services
 
-import (
-	"Exercise1/models"
-	"Exercise1/repositories"
-)
+import "Exercise1/repositories"
 
 type IStackService interface {
-	UpdateBookStock(bookID int, stock int) error
-	UpdateBookQuality(bookID int, quality string) error
-	GetAllBooks() ([]models.Stack, error)
+	CreateBookStockQuality(bookID int, stock int, quality string) error
 }
 
 type StackService struct {
 	IStackRepo repositories.IStackRepository
 }
 
-func (_self StackService) UpdateBookStock(bookID int, stock int) error {
-	return _self.IStackRepo.UpdateBookStock(bookID, stock)
-}
+// tạo stock và quality cho book
+func (_self StackService) CreateBookStockQuality(bookID int, stock int, quality string) error {
+	// Gọi hàm CreateBookStockQuality của repository
+	err := _self.IStackRepo.CreateBookStockQuality(bookID, stock, quality)
+	if err != nil {
+		return err
+	}
 
-func (_self StackService) UpdateBookQuality(bookID int, quality string) error {
-	return _self.IStackRepo.UpdateBookQuality(bookID, quality)
-}
-func (_self StackService) GetAllBooks() ([]models.Stack, error) {
-	return _self.IStackRepo.GetAllBooks()
+	return nil
 }

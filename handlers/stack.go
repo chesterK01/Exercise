@@ -5,28 +5,26 @@ import (
 	"Exercise1/services"
 	"Exercise1/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 )
 
 type StackHandler struct {
-	IStackService      services.IStackService
 	IAuthorBookService services.IAuthorBookService
+	IStackService      services.IStackService
 }
 
-func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request) {
+// API to create a new stock and quality for a book
+func (_self StackHandler) CreateBookStockQuality(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "PUT" {
+	if r.Method != "POST" {
 		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	// Lấy book ID từ query parameter 'id'
+	// Lấy book ID từ query parameter id
 	bookIDStr := r.URL.Query().Get("id")
-	fmt.Println("Received bookIDStr:", bookIDStr) // Thêm dòng in ra giá trị bookIDStr
-
 	if bookIDStr == "" {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Missing book ID")
 		return
@@ -39,8 +37,8 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Decode body để lấy thông tin stock
-	var data models.UpdateStockRequest
+	// Decode body để lấy thông tin stock và quality
+	var data models.UpdateStockQualityRequest
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
 		return
@@ -57,8 +55,8 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Gọi StackService để cập nhật tồn kho
-	err = _self.IStackService.UpdateBookStock(bookID, data.Stock)
+	// Gọi StackService để tạo stock và quality cho book
+	err = _self.IStackService.CreateBookStockQuality(bookID, data.Stock, data.Quality)
 	if err != nil {
 		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
 		return
@@ -66,60 +64,11 @@ func (_self StackHandler) UpdateBookStock(w http.ResponseWriter, r *http.Request
 
 	// Trả về JSON với thông tin cập nhật
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message":    "Stock updated successfully",
+		"message":    "Stock and quality created successfully",
 		"bookTitle":  authorBook.BookName,
 		"authorID":   authorBook.AuthorID,
 		"authorName": authorBook.AuthorName,
 		"newStock":   data.Stock,
+		"newQuality": data.Quality,
 	})
-}
-
-// API 2: Lưu chất lượng sách
-func (_self StackHandler) UpdateBookQuality(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method != "PUT" {
-		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
-	bookIDStr := r.URL.Query().Get("id")
-	bookID, err := strconv.Atoi(bookIDStr)
-	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid book ID")
-		return
-	}
-
-	var data models.UpdateQualityRequest // Sử dụng struct từ package models
-
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
-		return
-	}
-
-	err = _self.IStackService.UpdateBookQuality(bookID, data.Quality)
-	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	json.NewEncoder(w).Encode(map[string]string{"message": "Quality updated successfully"})
-}
-
-// API 3: Lấy danh sách sách
-func (_self StackHandler) GetAllBooks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method != "GET" {
-		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
-	stacks, err := _self.IStackService.GetAllBooks()
-	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	json.NewEncoder(w).Encode(stacks)
 }
