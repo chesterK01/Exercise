@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package="Exercise1/pb";
+
+// Định nghĩa service cho Book
+service BookService {
+  rpc CreateBook(CreateBookRequest) returns (CreateBookResponse);
+  rpc GetBooks(GetBooksRequest) returns (GetBooksResponse);
+  rpc GetBookByID(GetBookByIDRequest) returns (GetBookByIDResponse);
+}
+
+// Định nghĩa service cho Author
+service AuthorService {
+  rpc CreateAuthor(CreateAuthorRequest) returns (CreateAuthorResponse);
+  rpc GetAuthors(GetAuthorsRequest) returns (GetAuthorsResponse);
+  rpc GetAuthorByID(GetAuthorByIDRequest) returns (GetAuthorByIDResponse);
+}
+
+// Định nghĩa service cho Author_Book
+service AuthorBookService {
+  rpc CreateAuthorBook(CreateAuthorBookRequest) returns (CreateAuthorBookResponse);
+  rpc GetBooksByAuthorName(GetBooksByAuthorNameRequest) returns (GetBooksByAuthorNameResponse);
+  rpc GetAllAuthorBookRelationships(GetAllAuthorBookRelationshipsRequest) returns (GetAllAuthorBookRelationshipsResponse);
+  rpc GetAuthorBookByBookID(GetAuthorBookByBookIDRequest) returns (GetAuthorBookByBookIDResponse);
+}
+
+// Định nghĩa messages cho Book
+message Book {
+  string name = 1;
+  int32 id = 2;
+}
+
+message CreateBookRequest {
+  string name = 1;
+}
+
+message CreateBookResponse {
+  int32 id = 1;
+  string message = 2;
+}
+
+message GetBooksRequest {
+  int32 limit = 1;
+}
+
+message GetBooksResponse {
+  repeated Book books = 1;
+}
+
+message GetBookByIDRequest {
+  int32 id = 1;
+}
+
+message GetBookByIDResponse {
+  Book book = 1;
+}
+
+// Định nghĩa messages cho Author
+message Author {
+  string name = 1;
+  int32 id = 2;
+}
+
+message CreateAuthorRequest {
+  string name = 1;
+}
+
+message CreateAuthorResponse {
+  int32 id = 1;
+  string message = 2;
+}
+
+message GetAuthorsRequest {
+  int32 limit = 1;
+}
+
+message GetAuthorsResponse {
+  repeated Author authors = 1;
+}
+
+message GetAuthorByIDRequest {
+  int32 id = 1;
+}
+
+message GetAuthorByIDResponse {
+  Author author = 1;
+}
+
+// Định nghĩa messages cho Author_Book
+message AuthorBook {
+  int32 author_id = 1;
+  string author_name = 2;
+  int32 book_id = 3;
+  string book_name = 4;
+}
+
+message CreateAuthorBookRequest {
+  int32 author_id = 1;
+  int32 book_id = 2;
+}
+
+message CreateAuthorBookResponse {
+  string message = 1;
+}
+
+message GetBooksByAuthorNameRequest {
+  string author_name = 1;
+}
+
+message GetBooksByAuthorNameResponse {
+  repeated Book books = 1;
+}
+
+message GetAllAuthorBookRelationshipsRequest {}
+
+message GetAllAuthorBookRelationshipsResponse {
+  repeated AuthorBook author_books = 1;
+}
+
+message GetAuthorBookByBookIDRequest {
+  int32 book_id = 1;
+}
+
+message GetAuthorBookByBookIDResponse {
+  AuthorBook author_book = 1;
+}

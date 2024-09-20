@@ -47,6 +47,7 @@ func main() {
 	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName)                       // Get Book by Author_name
 	http.HandleFunc("/author_book/relationships", authorBookHandler.GetAllAuthorBookRelationships) // Get all author-book relationships
 	http.HandleFunc("/stack/create", stackHandler.CreateBookStockQuality)
+	http.HandleFunc("/stack/update", stackHandler.UpdateBookStockQuality)
 
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
