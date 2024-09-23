@@ -18,7 +18,7 @@ func (m *mockAuthorService) CreateAuthor(author *models.Author) (int64, error) {
 	return args.Get(0).(int64), args.Error(1)
 }
 
-// Test case cho CreateAuthor với Gin
+// Testcase for CreateAuthor with Gin
 func TestAuthorHandler_CreateAuthor(t *testing.T) {
 	type mockCreateAuthorService struct {
 		input *models.Author
@@ -80,38 +80,38 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 					Return(testCase.mockCreateAuthorInput.id, testCase.mockCreateAuthorInput.err)
 			}
 
-			// Tạo router của Gin
+			// Create Gin's router
 			router := gin.Default()
 
-			// Tạo AuthorHandler với mockAuthorService
+			// Create AuthorHandler with mockAuthorService
 			authorHandler := AuthorHandler{
 				IAuthorService: mockAuthorService,
 			}
 
-			// Đăng ký endpoint cho router
+			// Register endpoint for router
 			router.POST("/authors", authorHandler.CreateAuthor)
 
-			// Chuyển request body thành JSON
+			// Convert request body to JSON
 			requestBody, err := json.Marshal(testCase.requestBody)
 			require.NoError(t, err)
 
-			// Tạo request POST với router của Gin
+			// Create request POST with Gin's router
 			req, err := http.NewRequest(http.MethodPost, "/authors", bytes.NewBuffer(requestBody))
 			require.NoError(t, err)
 
-			// Tạo response recorder
+			// Create response recorder
 			responseRecorder := httptest.NewRecorder()
 
-			// Gọi handler qua router của Gin
+			// Call handler via Gin's router
 			router.ServeHTTP(responseRecorder, req)
 
-			// Kiểm tra status code
+			// Check status code
 			require.Equal(t, testCase.expectedStatus, responseRecorder.Code)
 
-			// Kiểm tra nội dung response body
+			// Check response body
 			require.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
 
-			// Xác thực rằng mock service được gọi chính xác
+			// Verify that the mock service is called correctly
 			if testCase.mockCreateAuthorInput != nil {
 				mockAuthorService.AssertCalled(t, "CreateAuthor", testCase.mockCreateAuthorInput.input)
 			}

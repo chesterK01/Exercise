@@ -18,6 +18,7 @@ func (m *mockBookService) CreateBook(book *models.Book) (int64, error) {
 	return args.Get(0).(int64), args.Error(1)
 }
 
+// Testcase for CreateBook with Gin
 func TestBookHandler_CreateBook(t *testing.T) {
 	testCases := []struct {
 		name                 string
@@ -71,38 +72,38 @@ func TestBookHandler_CreateBook(t *testing.T) {
 					Return(testCase.mockCreateBookID, testCase.mockCreateBookErr)
 			}
 
-			// Tạo router của Gin
+			// Create Gin's router
 			router := gin.Default()
 
-			// Tạo BookHandler với mockBookService
+			// Create BookHandler with mockBookService
 			bookHandler := BookHandler{
 				IBookService: mockBookService,
 			}
 
-			// Đăng ký endpoint cho router
+			// Register endpoint for router
 			router.POST("/books", bookHandler.CreateBook)
 
-			// Chuyển request body thành JSON
+			// Convert request body to JSON
 			requestBody, err := json.Marshal(testCase.requestBody)
 			require.NoError(t, err)
 
-			// Tạo request POST với router của Gin
+			// Create POST request with Gin's router
 			req, err := http.NewRequest(http.MethodPost, "/books", bytes.NewBuffer(requestBody))
 			require.NoError(t, err)
 
-			// Tạo response recorder
+			// Create response recorder
 			responseRecorder := httptest.NewRecorder()
 
-			// Gọi handler qua router của Gin
+			// Call handler via Gin's router
 			router.ServeHTTP(responseRecorder, req)
 
-			// Kiểm tra status code
+			// Check status code
 			require.Equal(t, testCase.expectedStatus, responseRecorder.Code)
 
-			// Kiểm tra nội dung response body
+			// Check response body
 			require.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
 
-			// Xác thực rằng mock service được gọi chính xác
+			// Verify that the mock service is called correctly
 			if testCase.mockCreateBookInput != nil {
 				mockBookService.AssertCalled(t, "CreateBook", testCase.mockCreateBookInput)
 			}
