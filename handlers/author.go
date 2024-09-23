@@ -4,7 +4,7 @@ import (
 	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
@@ -14,39 +14,25 @@ type AuthorHandler struct {
 }
 
 // API to create a new Author
-func (_self AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method != "POST" {
-		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
+func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
 	var author models.Author
-	err := json.NewDecoder(r.Body).Decode(&author)
-	if err != nil || author.Name == "" { // Check thêm nếu tên tác giả trống
-		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid input")
+	if err := c.ShouldBindJSON(&author); err != nil || author.Name == "" {
+		utils.ReturnErrorJSON(c.Writer, http.StatusBadRequest, "Invalid input")
 		return
 	}
 
 	id, err := _self.IAuthorService.CreateAuthor(&author)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		utils.ReturnErrorJSON(c.Writer, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Author created successfully", "id": id})
+	c.JSON(http.StatusCreated, gin.H{"message": "Author created successfully", "id": id})
 }
 
 // API to get all Authors
-func (_self AuthorHandler) GetAuthors(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method != "GET" {
-		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
-	limitStr := r.URL.Query().Get("limit")
+func (_self AuthorHandler) GetAuthors(c *gin.Context) {
+	limitStr := c.Query("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		limit = 10
@@ -54,40 +40,31 @@ func (_self AuthorHandler) GetAuthors(w http.ResponseWriter, r *http.Request) {
 
 	authors, err := _self.IAuthorService.GetAuthors(limit)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		utils.ReturnErrorJSON(c.Writer, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	json.NewEncoder(w).Encode(authors)
+	c.JSON(http.StatusOK, authors)
 }
 
 // API to get Author by authorID
-func (_self AuthorHandler) GetAuthorByID(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if r.Method != "GET" {
-		utils.ReturnErrorJSON(w, http.StatusMethodNotAllowed, "Method not allowed")
-		return
-	}
-
-	// Get author_id from query parameters
-	authorIDStr := r.URL.Query().Get("id")
+func (_self AuthorHandler) GetAuthorByID(c *gin.Context) {
+	authorIDStr := c.Query("id")
 	authorID, err := strconv.Atoi(authorIDStr)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusBadRequest, "Invalid Author ID")
+		utils.ReturnErrorJSON(c.Writer, http.StatusBadRequest, "Invalid Author ID")
 		return
 	}
 
-	// Call service to get Author's information
 	author, err := _self.IAuthorService.GetAuthorByID(authorID)
 	if err != nil {
-		utils.ReturnErrorJSON(w, http.StatusInternalServerError, err.Error())
+		utils.ReturnErrorJSON(c.Writer, http.StatusInternalServerError, err.Error())
 		return
 	}
 	if author == nil {
-		utils.ReturnErrorJSON(w, http.StatusNotFound, "Author not found")
+		utils.ReturnErrorJSON(c.Writer, http.StatusNotFound, "Author not found")
 		return
 	}
 
-	// Return Author data as JSON
-	json.NewEncoder(w).Encode(author)
+	c.JSON(http.StatusOK, author)
 }

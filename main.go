@@ -5,14 +5,15 @@ import (
 	"Exercise1/handlers"
 	"Exercise1/repositories"
 	"Exercise1/services"
-	"fmt"
-	"log"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	// Initialize database connection
 	dbConn := db.InitDB()
+
+	// Initialize Gin router
+	r := gin.Default()
 
 	// Create repositories
 	authorRepo := repositories.AuthorRepository{DB: dbConn}
@@ -34,21 +35,23 @@ func main() {
 		IAuthorBookService: authorBookService,
 		IStackService:      stackService,
 	}
-	// Routing API
-	http.HandleFunc("/author", authorHandler.CreateAuthor)     // Create a new Author
-	http.HandleFunc("/authors", authorHandler.GetAuthors)      // Get all Authors
-	http.HandleFunc("/author/id", authorHandler.GetAuthorByID) // Get Author by authorID
 
-	http.HandleFunc("/book", bookHandler.CreateBook)     // Create a new Book
-	http.HandleFunc("/books", bookHandler.GetBooks)      // Get all Books
-	http.HandleFunc("/book/id", bookHandler.GetBookByID) // Get Book by bookID
+	// Use Gin for routing API
+	r.POST("/author", authorHandler.CreateAuthor)    // Create a new Author
+	r.GET("/authors", authorHandler.GetAuthors)      // Get all Authors
+	r.GET("/author/id", authorHandler.GetAuthorByID) // Get Author by authorID
 
-	http.HandleFunc("/author_book", authorBookHandler.CreateAuthorBook)                            // Create a new Author-Book relationship
-	http.HandleFunc("/books/author", authorBookHandler.GetBooksByAuthorName)                       // Get Book by Author_name
-	http.HandleFunc("/author_book/relationships", authorBookHandler.GetAllAuthorBookRelationships) // Get all author-book relationships
-	http.HandleFunc("/stack/create", stackHandler.CreateBookStockQuality)
-	http.HandleFunc("/stack/update", stackHandler.UpdateBookStockQuality)
+	r.POST("/book", bookHandler.CreateBook)    // Create a new Book
+	r.GET("/books", bookHandler.GetBooks)      // Get all Books
+	r.GET("/book/id", bookHandler.GetBookByID) // Get Book by bookID
 
-	fmt.Println("Server is running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r.POST("/author-book", authorBookHandler.CreateAuthorBook)
+	r.POST("/author-books", authorBookHandler.GetAllAuthorBookRelationships)
+	r.POST("/author-book/id", authorBookHandler.GetAuthorBookByBookID)
+	r.POST("/author-book/name", authorBookHandler.GetBooksByAuthorName)
+
+	r.POST("/stack/create", stackHandler.CreateBookStockQuality) // Create a new stock and quality for a book
+
+	// Start the server
+	r.Run(":8080") // Default runs on localhost:8080
 }

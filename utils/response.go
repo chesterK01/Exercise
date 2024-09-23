@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
@@ -11,8 +12,8 @@ type ErrorResponse struct {
 }
 
 // Return errors as JSON
-func ReturnErrorJSON(w http.ResponseWriter, statusCode int, message string) {
+func ReturnErrorJSON(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorResponse{Error: message})
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(gin.H{"error": message})
 }

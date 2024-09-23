@@ -5,12 +5,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
+// Mock CreateAuthor method
+func (m *mockAuthorService) CreateAuthor(author *models.Author) (int64, error) {
+	args := m.Called(author)
+	return args.Get(0).(int64), args.Error(1)
+}
+
+// Test case cho CreateAuthor với Gin
 func TestAuthorHandler_CreateAuthor(t *testing.T) {
 	type mockCreateAuthorService struct {
 		input *models.Author
@@ -30,7 +38,7 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 			requestBody: map[string]interface{}{
 				"": "",
 			},
-			expectedResponseBody:  `{"error":"Invalid input"}` + "\n", // Định dạng JSON
+			expectedResponseBody:  `{"error":"Invalid input"}` + "\n",
 			expectedStatus:        http.StatusBadRequest,
 			mockCreateAuthorInput: nil,
 		},
@@ -39,7 +47,7 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 			requestBody: map[string]interface{}{
 				"name": "Arthur",
 			},
-			expectedResponseBody: `{"error":"failed to create author"}` + "\n", // Định dạng JSON
+			expectedResponseBody: `{"error":"failed to create author"}` + "\n",
 			expectedStatus:       http.StatusInternalServerError,
 			mockCreateAuthorInput: &mockCreateAuthorService{
 				input: &models.Author{Name: "Arthur"},
@@ -52,7 +60,7 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 			requestBody: map[string]interface{}{
 				"name": "Arthur",
 			},
-			expectedResponseBody: `{"id":1,"message":"Author created successfully"}` + "\n", // Bao gồm cả message
+			expectedResponseBody: `{"message":"Author created successfully","id":1}` + "\n",
 			expectedStatus:       http.StatusCreated,
 			mockCreateAuthorInput: &mockCreateAuthorService{
 				input: &models.Author{Name: "Arthur"},
@@ -64,6 +72,7 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			// Mocking AuthorService
 			mockAuthorService := new(mockAuthorService)
 
 			if testCase.mockCreateAuthorInput != nil {
@@ -71,22 +80,41 @@ func TestAuthorHandler_CreateAuthor(t *testing.T) {
 					Return(testCase.mockCreateAuthorInput.id, testCase.mockCreateAuthorInput.err)
 			}
 
+			// Tạo router của Gin
+			router := gin.Default()
+
+			// Tạo AuthorHandler với mockAuthorService
 			authorHandler := AuthorHandler{
 				IAuthorService: mockAuthorService,
 			}
 
+			// Đăng ký endpoint cho router
+			router.POST("/authors", authorHandler.CreateAuthor)
+
+			// Chuyển request body thành JSON
 			requestBody, err := json.Marshal(testCase.requestBody)
 			require.NoError(t, err)
 
+			// Tạo request POST với router của Gin
 			req, err := http.NewRequest(http.MethodPost, "/authors", bytes.NewBuffer(requestBody))
 			require.NoError(t, err)
 
+			// Tạo response recorder
 			responseRecorder := httptest.NewRecorder()
-			handler := http.HandlerFunc(authorHandler.CreateAuthor)
-			handler.ServeHTTP(responseRecorder, req)
 
+			// Gọi handler qua router của Gin
+			router.ServeHTTP(responseRecorder, req)
+
+			// Kiểm tra status code
 			require.Equal(t, testCase.expectedStatus, responseRecorder.Code)
+
+			// Kiểm tra nội dung response body
 			require.Equal(t, testCase.expectedResponseBody, responseRecorder.Body.String())
+
+			// Xác thực rằng mock service được gọi chính xác
+			if testCase.mockCreateAuthorInput != nil {
+				mockAuthorService.AssertCalled(t, "CreateAuthor", testCase.mockCreateAuthorInput.input)
+			}
 		})
 	}
 }
