@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Exercise1/middleware"
 	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
@@ -13,8 +14,14 @@ type AuthorHandler struct {
 	IAuthorService services.IAuthorService
 }
 
-// API to create a new Author
+// API để tạo Author mới (chỉ admin có thể tạo)
 func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
+	// Áp dụng middleware để kiểm tra quyền admin
+	middlewares.RoleMiddleware("admin")(c)
+	if c.IsAborted() {
+		return
+	}
+
 	var author models.Author
 	if err := c.ShouldBindJSON(&author); err != nil || author.Name == "" {
 		utils.ReturnErrorJSON(c.Writer, http.StatusBadRequest, "Invalid input")
@@ -30,7 +37,7 @@ func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Author created successfully", "id": id})
 }
 
-// API to get all Authors
+// API để lấy tất cả các Author (ai cũng có thể truy cập)
 func (_self AuthorHandler) GetAuthors(c *gin.Context) {
 	limitStr := c.Query("limit")
 	limit, err := strconv.Atoi(limitStr)
@@ -47,8 +54,14 @@ func (_self AuthorHandler) GetAuthors(c *gin.Context) {
 	c.JSON(http.StatusOK, authors)
 }
 
-// API to get Author by authorID
+// API để lấy thông tin Author theo ID (chỉ admin có thể truy cập)
 func (_self AuthorHandler) GetAuthorByID(c *gin.Context) {
+	// Áp dụng middleware để kiểm tra quyền admin
+	middlewares.RoleMiddleware("admin")(c)
+	if c.IsAborted() {
+		return
+	}
+
 	authorIDStr := c.Query("id")
 	authorID, err := strconv.Atoi(authorIDStr)
 	if err != nil {

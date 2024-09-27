@@ -3,55 +3,73 @@ package main
 import (
 	"Exercise1/db"
 	"Exercise1/handlers"
+	middlewares "Exercise1/middleware"
 	"Exercise1/repositories"
 	"Exercise1/services"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
-	// Initialize database connection
-	dbConn := db.InitDB()
+	// Khởi tạo kết nối cơ sở dữ liệu
+	database := db.InitDB()
+	defer database.Close()
 
-	// Initialize Gin router
-	r := gin.Default()
+	// Tạo các repository và service
+	authorRepo := repositories.AuthorRepository{DB: database}
+	authorService := services.AuthorService{IAuthorRepo: authorRepo}
+	authorHandler := handlers.AuthorHandler{IAuthorService: authorService}
 
-	// Create repositories
-	authorRepo := repositories.AuthorRepository{DB: dbConn}
-	bookRepo := repositories.BookRepository{DB: dbConn}
-	authorBookRepo := repositories.AuthorBookRepository{DB: dbConn}
-	stackRepo := repositories.StackRepository{DB: dbConn}
-
-	// Create services
-	authorService := services.AuthorService{IAuthorRepo: &authorRepo}
-	bookService := services.BookService{IBookRepo: &bookRepo}
-	authorBookService := services.AuthorBookService{IAuthorBookRepo: &authorBookRepo}
-	stackService := services.StackService{IStackRepo: &stackRepo}
-
-	// Create handlers
-	authorHandler := handlers.AuthorHandler{IAuthorService: &authorService}
-	bookHandler := handlers.BookHandler{IBookService: &bookService}
-	authorBookHandler := handlers.AuthorBookHandler{IAuthorBookService: &authorBookService}
-	stackHandler := handlers.StackHandler{
-		IAuthorBookService: authorBookService,
-		IStackService:      stackService,
+	bookRepo := repositories.BookRepository{DB: database}
+	bookService := services.BookService{IBookRepo: bookRepo}
+	bookHandler := handlers.BookHandler{IBookService: bookService}
+	// Khởi tạo JWT Middleware
+	authMiddleware, err := middlewares.AuthMiddleware()
+	if err != nil {
+		log.Fatal("JWT Error:" + err.Error())
 	}
 
-	// Use Gin for routing API
-	r.POST("/author", authorHandler.CreateAuthor)    // Create a new Author
-	r.GET("/authors", authorHandler.GetAuthors)      // Get all Authors
-	r.GET("/author/id", authorHandler.GetAuthorByID) // Get Author by authorID
+	// Khởi tạo router
+	router := gin.Default()
 
-	r.POST("/book", bookHandler.CreateBook)    // Create a new Book
-	r.GET("/books", bookHandler.GetBooks)      // Get all Books
-	r.GET("/book/id", bookHandler.GetBookByID) // Get Book by bookID
+	// Định nghĩa route /login để đăng nhập và lấy token
+	router.POST("/login", authMiddleware.LoginHandler)
 
-	r.POST("/author-book", authorBookHandler.CreateAuthorBook)
-	r.POST("/author-books", authorBookHandler.GetAllAuthorBookRelationships)
-	r.POST("/author-book/id", authorBookHandler.GetAuthorBookByBookID)
-	r.POST("/author-book/name", authorBookHandler.GetBooksByAuthorName)
+	// Nhóm các route yêu cầu xác thực
+	auth := router.Group("/auth")
+	auth.Use(authMiddleware.MiddlewareFunc())
+	{
+		// Các route quản lý authors, yêu cầu quyền admin
+		auth.POST("/create-author", authorHandler.CreateAuthor)
+		auth.GET("/authors", authorHandler.GetAuthors)
+		auth.GET("/author", authorHandler.GetAuthorByID)
+	}
 
-	r.POST("/stack/create", stackHandler.CreateBookStockQuality) // Create a new stock and quality for a book
+	auth.Use(authMiddleware.MiddlewareFunc())
+	{
+		auth.POST("/create-book", bookHandler.CreateBook)
+		auth.GET("/books", bookHandler.GetBooks)
+		auth.GET("/book", bookHandler.GetBookByID)
+	}
 
-	// Start the server
-	r.Run(":8080") // Default runs on localhost:8080
+	// Route mặc định
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Welcome to the Author API!",
+		})
+	})
+
+	// Cấu hình cổng chạy server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	// Chạy server
+	err = router.Run(":" + port)
+	if err != nil {
+		log.Fatalf("Không thể chạy server: %v", err)
+	}
 }

@@ -26,7 +26,7 @@ func (_self BookRepository) CreateBook(book *models.Book) (int64, error) {
 }
 
 // Get all Books
-func (_self *BookRepository) GetBooks(limit int) ([]models.Book, error) {
+func (_self BookRepository) GetBooks(limit int) ([]models.Book, error) {
 	query := `SELECT id, name FROM book LIMIT ?`
 	rows, err := _self.DB.Query(query, limit)
 	if err != nil {
@@ -46,7 +46,7 @@ func (_self *BookRepository) GetBooks(limit int) ([]models.Book, error) {
 }
 
 // Get Book by bookID
-func (_self *BookRepository) GetBookByID(bookID int) (*models.Book, error) {
+func (_self BookRepository) GetBookByID(bookID int) (*models.Book, error) {
 	var book models.Book
 	query := `SELECT id, name FROM book WHERE id = ?`
 	err := _self.DB.QueryRow(query, bookID).Scan(&book.ID, &book.Name)
