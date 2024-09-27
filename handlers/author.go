@@ -14,9 +14,9 @@ type AuthorHandler struct {
 	IAuthorService services.IAuthorService
 }
 
-// API để tạo Author mới (chỉ admin có thể tạo)
+// API to create new Author (only admin can access)
 func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
-	// Áp dụng middleware để kiểm tra quyền admin
+	// Apply middleware to check admin rights
 	middlewares.RoleMiddleware("admin")(c)
 	if c.IsAborted() {
 		return
@@ -37,7 +37,7 @@ func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Author created successfully", "id": id})
 }
 
-// API để lấy tất cả các Author (ai cũng có thể truy cập)
+// API to get all authors
 func (_self AuthorHandler) GetAuthors(c *gin.Context) {
 	limitStr := c.Query("limit")
 	limit, err := strconv.Atoi(limitStr)
@@ -54,9 +54,9 @@ func (_self AuthorHandler) GetAuthors(c *gin.Context) {
 	c.JSON(http.StatusOK, authors)
 }
 
-// API để lấy thông tin Author theo ID (chỉ admin có thể truy cập)
+// API to get Author by ID (Only admin can access)
 func (_self AuthorHandler) GetAuthorByID(c *gin.Context) {
-	// Áp dụng middleware để kiểm tra quyền admin
+	// Apply middleware to check admin rights
 	middlewares.RoleMiddleware("admin")(c)
 	if c.IsAborted() {
 		return

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	middlewares "Exercise1/middleware"
 	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
@@ -15,6 +16,12 @@ type BookHandler struct {
 
 // API to create a new Book
 func (_self BookHandler) CreateBook(c *gin.Context) {
+	// Apply middleware to check admin rights
+	middlewares.RoleMiddleware("admin")(c)
+	if c.IsAborted() {
+		return
+	}
+
 	var book models.Book
 	if err := c.ShouldBindJSON(&book); err != nil {
 		utils.ReturnErrorJSON(c.Writer, http.StatusBadRequest, "Invalid input")
@@ -49,6 +56,11 @@ func (_self BookHandler) GetBooks(c *gin.Context) {
 
 // API to get Book by bookID
 func (_self BookHandler) GetBookByID(c *gin.Context) {
+	// Apply middleware to check admin rights
+	middlewares.RoleMiddleware("admin")(c)
+	if c.IsAborted() {
+		return
+	}
 	bookIDStr := c.Query("id")
 	bookID, err := strconv.Atoi(bookIDStr)
 	if err != nil {

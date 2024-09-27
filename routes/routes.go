@@ -12,7 +12,7 @@ import (
 func SetupRoutes(db *sql.DB) (*gin.Engine, error) {
 	router := gin.Default()
 
-	// Tạo các repository và service
+	// Create repository and service
 	authorRepo := repositories.AuthorRepository{DB: db}
 	authorService := services.AuthorService{IAuthorRepo: authorRepo}
 	authorHandler := handlers.AuthorHandler{IAuthorService: authorService}
@@ -21,28 +21,38 @@ func SetupRoutes(db *sql.DB) (*gin.Engine, error) {
 	bookService := services.BookService{IBookRepo: bookRepo}
 	bookHandler := handlers.BookHandler{IBookService: bookService}
 
-	// Khởi tạo JWT Middleware
+	authorbookRepo := repositories.AuthorBookRepository{DB: db}
+	authorbookService := services.AuthorBookService{IAuthorBookRepo: authorbookRepo}
+	authorBookHandler := handlers.AuthorBookHandler{IAuthorBookService: authorbookService}
+	// Initialize JWT Middleware
 	authMiddleware, err := middleware.AuthMiddleware()
 	if err != nil {
 		return nil, err
 	}
 
-	// Định nghĩa route /login để đăng nhập và lấy token
+	// Define route /login to login and get token
 	router.POST("/login", authMiddleware.LoginHandler)
 
-	// Nhóm các route yêu cầu xác thực
+	// Group routes that require authentication
 	auth := router.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
-		// Các route quản lý authors
+		// Author management routes
 		auth.POST("/create-author", authorHandler.CreateAuthor)
 		auth.GET("/authors", authorHandler.GetAuthors)
 		auth.GET("/author", authorHandler.GetAuthorByID)
 
-		// Các route quản lý books
+		// Book management routes
 		auth.POST("/create-book", bookHandler.CreateBook)
 		auth.GET("/books", bookHandler.GetBooks)
 		auth.GET("/book", bookHandler.GetBookByID)
+
+		// Author-Book relationship management routes
+		auth.POST("/create-author-book", authorBookHandler.CreateAuthorBook)
+		auth.GET("/author-book/name", authorBookHandler.GetBooksByAuthorName)
+		auth.GET("/author-books", authorBookHandler.GetAllAuthorBookRelationships)
+		auth.GET("/author-book/id", authorBookHandler.GetAuthorBookByBookID)
+
 	}
 
 	return router, nil
