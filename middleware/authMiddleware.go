@@ -65,15 +65,25 @@ func AuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 func RoleMiddleware(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
-		userRole := claims["role"].(string)
 
-		if userRole != requiredRole {
-			c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to access this resource"})
-			c.Abort()
+		// Check if claims does not exist or has no role
+		userRole, ok := claims["role"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized, no role found"})
+			c.Abort() // Prevent continuation if no role exists
 			return
 		}
+
+		// Compare user's role with requested role
+		if userRole != requiredRole {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to access this resource"})
+			c.Abort() // Stop further processing without permission
+			return
+		}
+
+		// If role is valid, continue processing
 		c.Next()
 		fmt.Println("Extracted Claims:", claims)
-		fmt.Println("User Role:", claims["role"])
+		fmt.Println("User Role:", userRole)
 	}
 }

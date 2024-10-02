@@ -13,18 +13,18 @@ type StackRepository struct {
 	DB *sql.DB
 }
 
-// Hàm chèn stock và quality vào bảng stack
+// Function to insert stock and quality into stack table
 func (_self StackRepository) CreateBookStockQuality(bookID int, stock int, quality string) error {
-	// Câu truy vấn để chèn dữ liệu stock và quality
+	// Query to insert stock and quality data
 	query := `INSERT INTO stack (book_id, stock, quality) VALUES (?, ?, ?)`
 
-	// Thực hiện truy vấn
+	// Execute query
 	result, err := _self.DB.Exec(query, bookID, stock, quality)
 	if err != nil {
-		return errors.New("failed to insert stock and quality") // Trả về lỗi nếu có vấn đề khi thực hiện truy vấn
+		return errors.New("failed to insert stock and quality") // Returns an error if there is a problem executing the query
 	}
 
-	// Kiểm tra số hàng bị ảnh hưởng
+	// Check the number of affected rows
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return errors.New("failed to retrieve affected rows")
