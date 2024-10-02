@@ -10,9 +10,9 @@ type StackService struct {
 	IStackRepo repositories.IStackRepository
 }
 
-// tạo stock và quality cho book
+// Create stock and quality for book
 func (_self StackService) CreateBookStockQuality(bookID int, stock int, quality string) error {
-	// Gọi hàm CreateBookStockQuality của repository
+	// Call the repository's CreateBookStockQuality function
 	err := _self.IStackRepo.CreateBookStockQuality(bookID, stock, quality)
 	if err != nil {
 		return err

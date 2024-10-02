@@ -44,15 +44,26 @@ func SetupRoutes(db *sql.DB) (*gin.Engine, error) {
 	auth := router.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
+
+		// Author management routes for Admin only
+		admin := auth.Group("/admin")
+		admin.Use(middleware.RoleMiddleware("admin"))
+		{
+			// Author
+			admin.POST("/create-author", authorHandler.CreateAuthor)
+			admin.GET("/author", authorHandler.GetAuthorByID)
+
+			// Book
+			admin.POST("/create-book", bookHandler.CreateBook)
+			admin.GET("/book", bookHandler.GetBookByID)
+
+		}
+
 		// Author management routes
-		auth.POST("/create-author", authorHandler.CreateAuthor)
 		auth.GET("/authors", authorHandler.GetAuthors)
-		auth.GET("/author", authorHandler.GetAuthorByID)
 
 		// Book management routes
-		auth.POST("/create-book", bookHandler.CreateBook)
 		auth.GET("/books", bookHandler.GetBooks)
-		auth.GET("/book", bookHandler.GetBookByID)
 
 		// Author-Book relationship management routes
 		auth.POST("/create-author-book", authorBookHandler.CreateAuthorBook)

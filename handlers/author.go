@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"Exercise1/middleware"
 	"Exercise1/models"
 	"Exercise1/services"
 	"Exercise1/utils"
@@ -16,12 +15,6 @@ type AuthorHandler struct {
 
 // API to create new Author (only admin can access)
 func (_self AuthorHandler) CreateAuthor(c *gin.Context) {
-	// Apply middleware to check admin rights
-	middlewares.RoleMiddleware("admin")(c)
-	if c.IsAborted() {
-		return
-	}
-
 	var author models.Author
 	if err := c.ShouldBindJSON(&author); err != nil || author.Name == "" {
 		utils.ReturnErrorJSON(c.Writer, http.StatusBadRequest, "Invalid input")
@@ -56,12 +49,6 @@ func (_self AuthorHandler) GetAuthors(c *gin.Context) {
 
 // API to get Author by ID (Only admin can access)
 func (_self AuthorHandler) GetAuthorByID(c *gin.Context) {
-	// Apply middleware to check admin rights
-	middlewares.RoleMiddleware("admin")(c)
-	if c.IsAborted() {
-		return
-	}
-
 	authorIDStr := c.Query("id")
 	authorID, err := strconv.Atoi(authorIDStr)
 	if err != nil {
