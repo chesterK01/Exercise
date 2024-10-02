@@ -24,6 +24,13 @@ func SetupRoutes(db *sql.DB) (*gin.Engine, error) {
 	authorbookRepo := repositories.AuthorBookRepository{DB: db}
 	authorbookService := services.AuthorBookService{IAuthorBookRepo: authorbookRepo}
 	authorBookHandler := handlers.AuthorBookHandler{IAuthorBookService: authorbookService}
+
+	stackRepo := repositories.StackRepository{DB: db}
+	stackService := services.StackService{IStackRepo: stackRepo}
+	stackHandler := handlers.StackHandler{
+		IAuthorBookService: authorbookService,
+		IStackService:      stackService,
+	}
 	// Initialize JWT Middleware
 	authMiddleware, err := middleware.AuthMiddleware()
 	if err != nil {
@@ -53,6 +60,8 @@ func SetupRoutes(db *sql.DB) (*gin.Engine, error) {
 		auth.GET("/author-books", authorBookHandler.GetAllAuthorBookRelationships)
 		auth.GET("/author-book/id", authorBookHandler.GetAuthorBookByBookID)
 
+		// Stack management routes
+		auth.POST("/create-stack", stackHandler.CreateBookStockQuality)
 	}
 
 	return router, nil
