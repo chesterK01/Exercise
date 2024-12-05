@@ -11,6 +11,8 @@ services:
       - db 
     env_file:
       - .env
+    volumes:
+      - ./app:/app
 
   db:
     image: mysql:5.7
