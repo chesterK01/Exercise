@@ -15,12 +15,13 @@ A simple Go application that manages a library system with authors, books, and t
 
    -- Import the database schema and sample data
    SOURCE db/setup.sql;
+   ```
 ### **2. Start the Application**
 1. Open a terminal or command prompt in the folder where the application is located.
 2. Run the following command to start the application:
    ```sql
     go run main.go
-
+   ```
 ## **2. Run with Docker**
 ### **Steps**
 
@@ -29,12 +30,51 @@ A simple Go application that manages a library system with authors, books, and t
 2. Run this command to start the application and the database:
    ```sql
     docker-compose up --build
-
+   ```
 ### **2.Access the Application**:
-   Open your browser and go to: http://localhost:8080
-   
+   ```sql
+    Open your browser and go to: http://localhost:8080
+   ```
 ### **3.Stop the Application**:
    ```sql
-   docker-compose down
+    docker-compose down
+   ```
+## **APIs**
+### **Login and get JWT token**
+   ```sql
+   POST /login
+   ```
 
+### **Create a new author**
+   ```sql
+   POST /auth/admin/create-author	
+   ```
 
+### **Get a list of authors**
+   ```sql
+   GET /auth/authors	
+   ```
+
+### **Get author details by ID**
+   ```sql
+   GET /auth/admin/author
+   ```
+
+### **Create a new book**
+   ```sql
+   POST /auth/admin/create-book	
+   ```
+
+### **Get a list of books**
+   ```sql
+   GET /auth/books	
+   ```
+
+### **Get book details by ID**
+   ```sql
+   GET /auth/admin/book		
+   ```
+
+   
+   
+   
