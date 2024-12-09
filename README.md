@@ -1,0 +1,40 @@
+# Library Management System
+A simple Go application that manages a library system with authors, books, and their relationships. This application demonstrates two ways to run the system: with and without Docker.
+
+---
+
+## **1. Run without Docker**
+### **Steps**
+
+### **1. Set Up the Database**
+1. Open MySQL Workbench or a terminal.
+2. Run the following commands to create the database and set up the tables:
+   ```sql
+   CREATE DATABASE library;
+   USE library;
+
+   -- Import the database schema and sample data
+   SOURCE db/setup.sql;
+### **2. Start the Application**
+1. Open a terminal or command prompt in the folder where the application is located.
+2. Run the following command to start the application:
+   ```sql
+    go run main.go
+
+## **2. Run with Docker**
+### **Steps**
+
+### **1. Run the Application**
+1. Open a terminal or command prompt in the folder where this application is located.
+2. Run this command to start the application and the database:
+   ```sql
+    docker-compose up --build
+
+### **2.Access the Application**:
+   Open your browser and go to: http://localhost:8080
+   
+### **3.Stop the Application**:
+   ```sql
+   docker-compose down
+
+
