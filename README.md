@@ -40,40 +40,96 @@ A simple Go application that manages a library system with authors, books, and t
     docker-compose down
    ```
 ## **APIs**
-### **Login and get JWT token**
-   ```sql
-   POST /login
-   ```
-
 ### **Create a new author**
    ```sql
    POST /auth/admin/create-author	
+   ```
+- Request body
+   ```sql
+   {
+   "name": "Nguyen Van A"
+   }
+   ```
+- Response body
+   ```sql
+   {
+  "message": "Author created successfully",
+  "id": 1
+   }
    ```
 
 ### **Get a list of authors**
    ```sql
    GET /auth/authors	
    ```
+- Response body
+   ```sql 
+  {
+    "id": 1,
+    "name": "Nguyen Van A"
+  },
+  {
+    "id": 2,
+    "name": "Nguyen Van B"
+  }
+  ```
 
 ### **Get author details by ID**
    ```sql
-   GET /auth/admin/author
+    GET /auth/admin/author?id=1
    ```
-
+- Response body
+   ```sql 
+  {
+  "id": 1,
+  "name": "Nguyen Van A"
+   }
+  ```
 ### **Create a new book**
    ```sql
    POST /auth/admin/create-book	
+   ```
+- Request body
+   ```sql
+   {
+  "name": "Harry Potter"
+   }
+   ```
+- Response body
+   ```sql
+   {
+  "message": "Book created successfully",
+  "id": 1
+   }
    ```
 
 ### **Get a list of books**
    ```sql
    GET /auth/books	
    ```
+- Response body
+   ```sql
+  {
+    "id": 1,
+    "name": "Harry Potter"
+  },
+  {
+    "id": 2,
+    "name": "Runeterra"
+  }
+  ```
 
 ### **Get book details by ID**
    ```sql
-   GET /auth/admin/book		
+    GET /auth/admin/book?id=1
    ```
+- Response body
+   ```sql
+  {
+  "id": 1,
+  "name": "Harry Potter"
+   }
+  ```
 
    
    
